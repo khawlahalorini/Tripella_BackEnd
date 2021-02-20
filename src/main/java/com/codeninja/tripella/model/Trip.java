@@ -9,6 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 @Entity
 public class Trip {
@@ -25,6 +26,10 @@ public class Trip {
 	
 	@OneToMany(mappedBy = "trip")
 	private List<Detail> detail;
+	
+    @OneToOne
+    @JoinColumn(name = "share_id")
+    private Share share;
 
 	public int getId() {
 		return id;
@@ -65,6 +70,22 @@ public class Trip {
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
+	public List<Detail> getDetail() {
+		return detail;
+	}
+
+	public void setDetail(List<Detail> detail) {
+		this.detail = detail;
+	}
+
+	public Share getShare() {
+		return share;
+	}
+
+	public void setShare(Share share) {
+		this.share = share;
+	}
+
 	
 }

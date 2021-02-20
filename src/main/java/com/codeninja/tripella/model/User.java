@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,6 +30,10 @@ public class User {
 
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
+
+	@ManyToOne
+    @JoinColumn(name="share_id")
+    private Share share;
 
 	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
@@ -109,6 +115,14 @@ public class User {
 		this.trip = trip;
 	}
 
+	public Share getShare() {
+		return share;
+	}
+
+	public void setShare(Share share) {
+		this.share = share;
+	}
+
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -124,5 +138,6 @@ public class User {
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
 	}
+
 
 }

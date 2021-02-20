@@ -1,12 +1,20 @@
 package com.codeninja.tripella.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+@Entity
+public class User {
+	
 	@Id
 	@GeneratedValue
 	private int id;
@@ -15,6 +23,8 @@ import javax.persistence.Id;
 	private String emailAddress;
 	private String password;
 	private String userRole;
+	private boolean isEnabled = true;
+	private String photo;
 
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
@@ -122,4 +132,11 @@ import javax.persistence.Id;
 		this.photo = photo;
 	}
 
+	public List<Trip> getTrip() {
+		return trip;
+	}
+
+	public void setTrip(List<Trip> trip) {
+		this.trip = trip;
+	}
 }

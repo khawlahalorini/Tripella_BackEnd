@@ -3,7 +3,7 @@ package com.codeninja.tripella.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +16,7 @@ public class UserController {
 	@Autowired
 	UserDao userDao;
 	
-	@GetMapping("/user/register")
+	@PostMapping("/user/register")
 	public ResponseEntity<?> register(@RequestBody User user){
 		
 		if (userDao.existsByEmailAddress(user.getEmailAddress())) {

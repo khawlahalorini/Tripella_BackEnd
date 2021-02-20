@@ -1,12 +1,16 @@
 package com.codeninja.tripella.model;
 
 import java.sql.Date;
+import java.util.List;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
+@Entity
 public class Trip {
 	@Id
 	@GeneratedValue
@@ -18,6 +22,9 @@ public class Trip {
 	@ManyToOne
     @JoinColumn(name="user_id", nullable=false)
     private User user;
+	
+	@OneToMany(mappedBy = "trip")
+	private List<Detail> detail;
 
 	public int getId() {
 		return id;

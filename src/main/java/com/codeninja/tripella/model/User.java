@@ -28,19 +28,12 @@ public class User {
 
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
-	
-	@Column(name="createdAt", nullable = false)
-	@CreationTimestamp
-	private LocalDateTime createAt;
 
-	private boolean isEnabled = true;
-	private String photo;
-
-	@Column(name = "createdAt", nullable = false, updatable = false) // do we need the name??
+	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
 	private LocalDateTime createdAt;
 
-	@Column(name = "updatedAt", nullable = false, updatable = true) // do we need the name??
+	@Column(name = "updatedAt", nullable = false, updatable = true)
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
 
@@ -92,20 +85,28 @@ public class User {
 		this.userRole = userRole;
 	}
 
-	public LocalDateTime getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(LocalDateTime createAt) {
-		this.createAt = createAt;
-	}
-	
 	public boolean isEnabled() {
 		return isEnabled;
 	}
 
 	public void setEnabled(boolean isEnabled) {
 		this.isEnabled = isEnabled;
+	}
+
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
+	public List<Trip> getTrip() {
+		return trip;
+	}
+
+	public void setTrip(List<Trip> trip) {
+		this.trip = trip;
 	}
 
 	public LocalDateTime getCreatedAt() {
@@ -124,19 +125,4 @@ public class User {
 		this.updatedAt = updatedAt;
 	}
 
-	public String getPhoto() {
-		return photo;
-	}
-
-	public void setPhoto(String photo) {
-		this.photo = photo;
-	}
-
-	public List<Trip> getTrip() {
-		return trip;
-	}
-
-	public void setTrip(List<Trip> trip) {
-		this.trip = trip;
-	}
 }

@@ -1,20 +1,12 @@
 package com.codeninja.tripella.model;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
-import org.hibernate.annotations.CreationTimestamp;
-
-@Entity
-@Table(name = "User")
-public class User {
 	@Id
 	@GeneratedValue
 	private int id;
@@ -23,13 +15,24 @@ public class User {
 	private String emailAddress;
 	private String password;
 	private String userRole;
-	
+
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
 	
 	@Column(name="createdAt", nullable = false)
 	@CreationTimestamp
 	private LocalDateTime createAt;
+
+	private boolean isEnabled = true;
+	private String photo;
+
+	@Column(name = "createdAt", nullable = false, updatable = false) // do we need the name??
+	@CreationTimestamp
+	private LocalDateTime createdAt;
+
+	@Column(name = "updatedAt", nullable = false, updatable = true) // do we need the name??
+	@UpdateTimestamp
+	private LocalDateTime updatedAt;
 
 	public int getId() {
 		return id;
@@ -87,4 +90,36 @@ public class User {
 		this.createAt = createAt;
 	}
 	
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	public void setEnabled(boolean isEnabled) {
+		this.isEnabled = isEnabled;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
 }

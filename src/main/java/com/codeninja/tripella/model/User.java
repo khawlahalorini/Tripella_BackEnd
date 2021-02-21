@@ -36,11 +36,11 @@ public class User {
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
 	
+	@ManyToMany(mappedBy = "sharedWith")
+	private List<Trip> inshare;
+	
 	@OneToMany(mappedBy = "user")
 	private List<Review> reviews;
-
-	@ManyToMany
-    private List<Share> share;
 
 	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
@@ -91,6 +91,8 @@ public class User {
 	}
 
 	public String getUserRole() {
+		if(userRole == null || userRole.isBlank())
+			return "ROLE_USER";
 		return userRole;
 	}
 
@@ -120,14 +122,6 @@ public class User {
 
 	public void setTrip(List<Trip> trip) {
 		this.trip = trip;
-	}
-
-	public List<Share> getShare() {
-		return share;
-	}
-
-	public void setShare(List<Share> share) {
-		this.share = share;
 	}
 
 	public LocalDateTime getCreatedAt() {
@@ -161,4 +155,13 @@ public class User {
 	public void setReviews(List<Review> reviews) {
 		this.reviews = reviews;
 	}
+
+	public List<Trip> getInshare() {
+		return inshare;
+	}
+
+	public void setInshare(List<Trip> inshare) {
+		this.inshare = inshare;
+	}
+	
 }

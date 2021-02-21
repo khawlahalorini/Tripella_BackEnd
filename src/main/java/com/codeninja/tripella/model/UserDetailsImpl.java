@@ -18,6 +18,7 @@ public class UserDetailsImpl implements UserDetails {
 	private String name;
 	private int id;
 	private boolean isEnabled;
+	private String userRole;
 	private List<GrantedAuthority> authorities;
 	
 	//Constructor
@@ -30,6 +31,7 @@ public class UserDetailsImpl implements UserDetails {
 		name = user.getFirstName();
 		id = user.getId();
 		isEnabled = user.isEnabled();
+		userRole = user.getUserRole();
 		authorities = Arrays.stream(user.getUserRole().split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 	}
 	
@@ -54,6 +56,14 @@ public class UserDetailsImpl implements UserDetails {
 	
 	public int getId() {
 		return id;
+	}
+	
+	public String getRole() {
+		return userRole;
+	}
+	
+	public boolean isAdmin() {
+		return getRole().equals("ROLE_ADMIN");
 	}
 	
 

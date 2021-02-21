@@ -36,6 +36,9 @@ public class Post {
 	@ManyToMany(mappedBy = "wishlist")
 	private List<User> wishlistedBy;
 	
+	@OneToMany(mappedBy="post")
+	private List<Detail> detail;
+	
 	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
 	private LocalDateTime createdAt;

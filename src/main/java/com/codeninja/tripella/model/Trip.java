@@ -7,9 +7,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
 @Entity
 public class Trip {
@@ -24,12 +25,12 @@ public class Trip {
     @JoinColumn(name="user_id", nullable=false)
     private User user;
 	
+	@ManyToMany
+	@JoinTable(name = "user_share", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "trip_id")})
+	private List<User> sharedWith;
+	
 	@OneToMany(mappedBy = "trip")
 	private List<Detail> detail;
-	
-    @OneToOne
-    @JoinColumn(name = "share_id")
-    private Share share;
 
 	public int getId() {
 		return id;
@@ -79,13 +80,12 @@ public class Trip {
 		this.detail = detail;
 	}
 
-	public Share getShare() {
-		return share;
+	public List<User> getSharedWith() {
+		return sharedWith;
 	}
 
-	public void setShare(Share share) {
-		this.share = share;
+	public void setSharedWith(List<User> sharedWith) {
+		this.sharedWith = sharedWith;
 	}
-
 	
 }

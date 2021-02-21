@@ -23,7 +23,7 @@ public class Review {
 	@ManyToOne
     @JoinColumn(name = "post_id")
 	private Post post;
-
+	
 	public int getId() {
 		return id;
 	}
@@ -56,6 +56,14 @@ public class Review {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public Post getPost() {
+		return post;
+	}
+
+	public void setPost(Post post) {
+		this.post = post;
 	}
 	
 }

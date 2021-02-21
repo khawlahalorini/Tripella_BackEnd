@@ -7,6 +7,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -25,9 +28,17 @@ public class User {
 	private String userRole;
 	private boolean isEnabled = true;
 	private String photo;
+	
+	@ManyToMany
+	@JoinTable(name = "wishlists", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "post_id")})
+	private List<Post> wishlist;
 
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
+	
+	@OneToMany(mappedBy = "user")
+	@JoinColumn(referencedColumnName = "id")
+	private List<Review> reviews;
 
 	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
@@ -123,6 +134,22 @@ public class User {
 
 	public void setUpdatedAt(LocalDateTime updatedAt) {
 		this.updatedAt = updatedAt;
+	}
+
+	public List<Post> getWishlist() {
+		return wishlist;
+	}
+
+	public void setWishlist(List<Post> wishlist) {
+		this.wishlist = wishlist;
+	}
+
+	public List<Review> getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(List<Review> reviews) {
+		this.reviews = reviews;
 	}
 
 }

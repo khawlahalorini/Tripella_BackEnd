@@ -38,7 +38,6 @@ public class User {
 	private List<Trip> trip;
 	
 	@OneToMany(mappedBy = "user")
-	@JoinColumn(referencedColumnName = "id")
 	private List<Review> reviews;
 
 	@ManyToOne
@@ -94,6 +93,8 @@ public class User {
 	}
 
 	public String getUserRole() {
+		if(userRole == null || userRole.isBlank())
+			return "ROLE_USER";
 		return userRole;
 	}
 

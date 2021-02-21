@@ -19,6 +19,10 @@ public class Review {
 	@ManyToOne
     @JoinColumn(name="user_id", nullable=false)
     private User user;
+	
+	@ManyToOne
+    @JoinColumn(name = "post_id")
+	private Post post;
 
 	public int getId() {
 		return id;

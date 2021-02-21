@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -38,12 +37,10 @@ public class User {
 	private List<Trip> trip;
 	
 	@OneToMany(mappedBy = "user")
-	@JoinColumn(referencedColumnName = "id")
 	private List<Review> reviews;
 
-	@ManyToOne
-    @JoinColumn(name="share_id")
-    private Share share;
+	@ManyToMany
+    private List<Share> share;
 
 	@Column(name = "createdAt", nullable = false)
 	@CreationTimestamp
@@ -125,11 +122,11 @@ public class User {
 		this.trip = trip;
 	}
 
-	public Share getShare() {
+	public List<Share> getShare() {
 		return share;
 	}
 
-	public void setShare(Share share) {
+	public void setShare(List<Share> share) {
 		this.share = share;
 	}
 

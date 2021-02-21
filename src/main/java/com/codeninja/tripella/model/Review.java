@@ -20,6 +20,10 @@ public class Review {
     @JoinColumn(name="user_id", nullable=false)
     private User user;
 
+	@ManyToOne
+    @JoinColumn(name="post_id", nullable=false)
+    private Post post;
+	
 	public int getId() {
 		return id;
 	}
@@ -52,6 +56,14 @@ public class Review {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public Post getPost() {
+		return post;
+	}
+
+	public void setPost(Post post) {
+		this.post = post;
 	}
 	
 }

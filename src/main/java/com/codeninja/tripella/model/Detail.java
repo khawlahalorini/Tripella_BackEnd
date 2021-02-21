@@ -20,9 +20,9 @@ public class Detail {
     @JoinColumn(name="trip_id", nullable=false)
     private Trip trip;
 
-//	@ManyToOne
-//  @JoinColumn(name="post_id", nullable=false)
-//  private Post post;
+	@ManyToOne
+    @JoinColumn(name="post_id", nullable=false)
+    private Post post;
 
 	public int getId() {
 		return id;

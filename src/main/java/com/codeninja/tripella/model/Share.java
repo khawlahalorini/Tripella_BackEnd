@@ -5,7 +5,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -18,7 +18,7 @@ public class Share {
     @OneToOne(mappedBy = "share")
     private Trip trip;
     
-	@OneToMany(mappedBy = "share")
+    @ManyToMany
 	private List<User> user;
 
 	public int getId() {

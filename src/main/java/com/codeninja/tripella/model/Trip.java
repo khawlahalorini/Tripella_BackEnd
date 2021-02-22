@@ -11,14 +11,19 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.FutureOrPresent;
 
 @Entity
 public class Trip {
 	@Id
 	@GeneratedValue
 	private int id;
+	
 	private String name;
+	
+	@FutureOrPresent 
 	private Date start;
+	
 	private Date end;
 	
 	@ManyToOne

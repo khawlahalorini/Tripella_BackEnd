@@ -1,6 +1,7 @@
 package com.codeninja.tripella.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,10 +20,15 @@ public class TripController {
 	TripDao dao;
 
 	@PostMapping("/trip/add")
-	public Trip addTrip(@RequestBody Trip trip) {
-		dao.save(trip);
+	public ResponseEntity<?> addTrip(@RequestBody Trip trip) {
+		if(trip.getName() == null)
+			return ResponseEntity.badRequest().body("The name can not be void");
+		if (trip.getEnd().after(trip.getStart()) || trip.getEnd().equals(trip.getStart()))
+			return ResponseEntity.badRequest().body("The date of the end date should be after the start date");
 
-		return trip;
+			dao.save(trip);
+			return ResponseEntity.ok(trip);
+
 	}
 
 	@GetMapping("/trip/index")
@@ -41,10 +47,14 @@ public class TripController {
 	}
 
 	@PutMapping("/trip/edit")
-	public Trip editTrip(@RequestBody Trip trip) {
-		dao.save(trip);
+	public ResponseEntity<?> editTrip(@RequestBody Trip trip) {
+		if(trip.getName() == null)
+			return ResponseEntity.badRequest().body("The name can not be void");
+		if (trip.getEnd().after(trip.getStart()) || trip.getEnd().equals(trip.getStart()))
+			return ResponseEntity.badRequest().body("The date of the end date should be after the start date");
 
-		return trip;
+			dao.save(trip);
+			return ResponseEntity.ok(trip);
 	}
 
 	@DeleteMapping("/trip/delete")

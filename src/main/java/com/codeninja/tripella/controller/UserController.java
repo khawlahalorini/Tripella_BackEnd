@@ -1,10 +1,17 @@
 package com.codeninja.tripella.controller;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
+
+import javax.mail.*;
+import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -163,7 +170,60 @@ public class UserController {
 		return ResponseEntity.ok(user.getTrip());
 	}
 	
-//	@PutMapping("/user/resetpassword")
+	@PutMapping("/user/handleresetpassword")
+	public void handleresetpassword(@RequestParam String email) throws UnsupportedEncodingException, MessagingException {
+		User user = userDao.findByEmailAddress(email);
+		String confirmationToken = UUID.randomUUID().toString();
+		user.setConfirmationToken(confirmationToken);
+		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token=" + confirmationToken;
+        sendEmail(email, resetPasswordLink);
+	}
+	
+	
+    public User getByResetPasswordToken(String token) {
+        return userDao.findByConfirmationToken(token);
+    }
+	
+    @Autowired
+    private JavaMailSender mailSender;
+    
+    @PostMapping("/user/handleresetpassword/resetpassword/updatepassword")
+    public String updatePassword(@RequestParam String newPassword, @RequestParam String token) {
+    	User user = userDao.findByConfirmationToken(token);
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String encodedPassword = passwordEncoder.encode(newPassword);
+        user.setPassword(encodedPassword);
+         
+        user.setConfirmationToken(null);
+        userDao.save(user);
+        return "succ";
+    }
+    
+    public void sendEmail(String recipientEmail, String link)
+            throws MessagingException, UnsupportedEncodingException {
+        MimeMessage message = mailSender.createMimeMessage();              
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+         
+        helper.setFrom("tt2688519@gmail.com", "Tripella Support");
+        helper.setTo(recipientEmail);
+         
+        String subject = "Here's the link to reset your password";
+         
+        String content = "<p>Hello,</p>"
+                + "<p>You have requested to reset your password.</p>"
+                + "<p>Click the link below to change your password:</p>"
+                + "<p><a href=\"" +link+ "\">Change my password</a></p>"
+                + "<br>"
+                + "<p>Ignore this email if you do remember your password, "
+                + "or you have not made the request.</p>";
+         
+        helper.setSubject(subject);
+         
+        helper.setText(content, true);
+         
+        mailSender.send(message);
+    }
+    
 //	@PutMapping("/user/forgotpassword")
 //	@PutMapping("/user/updaterole")
 	

@@ -104,11 +104,13 @@ public class UserService {
 	}
 
 	public void handleresetpassword(String email) throws UnsupportedEncodingException, MessagingException {
+		
+		// adding if user find (if....else or try.....catch? ) 
 		User user = userDao.findByEmailAddress(email);
 		String confirmationToken = UUID.randomUUID().toString();
 		user.setConfirmationToken(confirmationToken);
 		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token="
-				+ confirmationToken;
+				+ confirmationToken; // change this in deployment 
 		sendEmail(email, resetPasswordLink);
 	}
 

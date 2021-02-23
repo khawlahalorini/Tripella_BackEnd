@@ -18,5 +18,7 @@ public interface PostDao extends CrudRepository<Post,Integer>{
 	List<Post> findAllByCountry(String country);
 	
 	List<Post> findAllByType(String type);
+	
+	List<Post> findAllByWishlistedBy_Id(int id);
 
 }

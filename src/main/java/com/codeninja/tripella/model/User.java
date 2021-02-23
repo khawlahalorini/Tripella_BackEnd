@@ -1,6 +1,8 @@
 package com.codeninja.tripella.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -15,6 +17,9 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class User {
 	
@@ -24,21 +29,45 @@ public class User {
 	private String firstName;
 	private String lastName;
 	private String emailAddress;
+	
+	@JsonIgnore
 	private String password;
+	
+	@JsonIgnore
 	private String userRole;
-	private boolean isEnabled = true;
+	
+	@JsonIgnore
+	private boolean isEnabled;
+	
 	private String photo;
 	
+	@JsonIgnore
 	@ManyToMany
 	@JoinTable(name = "wishlists", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "post_id")})
 	private List<Post> wishlist;
 
+	//Constructor to map and validate user data to user object
+	public User(HashMap<String, String> userData) {
+		setEmailAddress(userData.get("emailAddress"));
+		setPassword(userData.get("password"));
+		setFirstName(userData.get("firstName"));
+		setLastName(userData.get("LastName"));
+		setPhoto(userData.get("photo"));
+	}
+
+	public User() {
+		super();
+	}
+	
+	@JsonIgnore
 	@OneToMany(mappedBy = "user")
 	private List<Trip> trip;
 	
+	@JsonIgnore
 	@ManyToMany(mappedBy = "sharedWith")
 	private List<Trip> inshare;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy = "user")
 	private List<Review> reviews;
 
@@ -91,7 +120,7 @@ public class User {
 	}
 
 	public String getUserRole() {
-		if(userRole == null || userRole.isBlank())
+		if(userRole == null || userRole.isBlank())  //set defaultview
 			return "ROLE_USER";
 		return userRole;
 	}
@@ -100,7 +129,9 @@ public class User {
 		this.userRole = userRole;
 	}
 
+	@JsonIgnore //does't start with get
 	public boolean isEnabled() {
+		
 		return isEnabled;
 	}
 
@@ -142,6 +173,14 @@ public class User {
 
 	public List<Post> getWishlist() {
 		return wishlist;
+	}
+	
+	@JsonGetter
+	public List<Integer> wishlist() {
+		List<Integer> ids = new ArrayList<Integer>();
+		for(Post post : wishlist)
+			ids.add(post.getId());
+		return ids;
 	}
 
 	public void setWishlist(List<Post> wishlist) {

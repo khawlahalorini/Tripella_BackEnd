@@ -1,9 +1,9 @@
 package com.codeninja.tripella.controller;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import com.codeninja.tripella.model.Post;
 import com.codeninja.tripella.model.User;
 import com.codeninja.tripella.model.UserDetailsImpl;
 import com.codeninja.tripella.config.JwtUtil;
+import com.codeninja.tripella.dao.PostDao;
 import com.codeninja.tripella.dao.UserDao;
 
 @RestController
@@ -30,9 +32,14 @@ public class UserController {
 
 	@Autowired
 	UserDao userDao;
+	
+	@Autowired
+	PostDao postDao;
 
 	@PostMapping("/user/register")
-	public ResponseEntity<?> register(@RequestBody User user) {
+	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) {
+		
+		User user = new User(userData);
 
 		if (userDao.existsByEmailAddress(user.getEmailAddress())) {
 			return ResponseEntity.badRequest().body("User already exists");
@@ -59,29 +66,39 @@ public class UserController {
 	@Autowired
 	UserDetailsService userDetailsService;
 
-	@PostMapping("/user/authenticate")
-	public ResponseEntity<?> authenticate(@RequestBody User user) {
+	@GetMapping("/user/authenticate")
+	public ResponseEntity<?> authenticate(@RequestBody HashMap<String,String> userData) {
 
 		try {
 			authenticationManager
-					.authenticate(new UsernamePasswordAuthenticationToken(user.getEmailAddress(), user.getPassword()));
+					.authenticate(new UsernamePasswordAuthenticationToken(userData.get("emailAddress"), userData.get("password")));
 		} catch (BadCredentialsException e) {
 			return ResponseEntity.badRequest().body("Incorrect username or password");
 		}
-
-		UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmailAddress());
+		
+		UserDetails userDetails = userDetailsService.loadUserByUsername(userData.get("emailAddress"));
 		
 		return ResponseEntity.ok(jwtUtil.generateToken(userDetails));
 	}
 
-	@PostMapping("/user/update")
+	@GetMapping("/user/detail")
+	public ResponseEntity<?> getUserDetails(@RequestParam(required = false) Integer id, @AuthenticationPrincipal UserDetailsImpl currentUser) {
+		User user = null;
+		user = (id !=null && userDao.existsById(id) && currentUser.isAdmin())
+					? userDao.findById(id.intValue())
+					: userDao.findById(currentUser.getId());
+		
+		return ResponseEntity.ok(user);
+	}
+
+	@PutMapping("/user/update")
 	public ResponseEntity<?> updateUser(@RequestParam int id, @RequestBody User newUser){
 		
 		User oldUser = userDao.findById(newUser.getId());
 		
 		newUser.setEmailAddress(oldUser.getEmailAddress()); //secure email address
 		newUser.setPassword(oldUser.getPassword()); 		//different method for password change
-		newUser.setUserRole("ROLE_USER"); 					//secure role; can be changed by another method
+		newUser.setUserRole(oldUser.getUserRole()); 		//secure role; can be changed by another method
 		
 		try {
 			userDao.save(newUser);
@@ -104,11 +121,40 @@ public class UserController {
 	}
 	
 	
-	
 	@GetMapping("/user/wishlist")
 	public ResponseEntity<?> getWishlist(@AuthenticationPrincipal UserDetailsImpl currentUser) {
 		User user = userDao.findById(currentUser.getId());
-		return ResponseEntity.ok(user.getWishlist());
+//		return ResponseEntity.ok(user.getWishlist());
+		return ResponseEntity.ok(postDao.findAllByWishlistedBy_Id(user.getId()));
+	}
+	
+	@PutMapping("/user/wishlist")
+	public ResponseEntity<?> addToWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
+		
+		//get user object & user's wishlist
+		User user = userDao.findById(currentUser.getId());
+		List<Post> wishlist = user.getWishlist();
+		Post post;
+		
+		//validate post id
+		if(!postDao.existsById(id)) 
+			return ResponseEntity.badRequest().build();
+		
+		post = postDao.findById(id);
+		
+		if ( !wishlist.contains( postDao.findById(id) ) ) {
+			wishlist.add(postDao.findById(id));
+			user.setWishlist(wishlist);
+			userDao.save(user);
+		}
+		
+		return ResponseEntity.ok().build();
+	}
+	
+	@DeleteMapping("/user/wishlist")
+	public ResponseEntity<?> removeFromWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
+		//List<Post> whishlist
+		return ResponseEntity.ok().build();
 	}
 	
 	@GetMapping("/user/triplist")
@@ -117,18 +163,8 @@ public class UserController {
 		return ResponseEntity.ok(user.getTrip());
 	}
 	
-	@GetMapping("/user/detail")
-	public ResponseEntity<?> getUserDetails(@RequestParam int id, @AuthenticationPrincipal UserDetailsImpl currentUser) {
-		User user = null;
-		user = (userDao.existsById(id) && currentUser.isAdmin())
-					? userDao.findById(id)
-					: userDao.findById(currentUser.getId());
-		
-		user.setPassword("**********"); // hide password 
-		return ResponseEntity.ok(user);
-	}
+//	@PutMapping("/user/resetpassword")
+//	@PutMapping("/user/forgotpassword")
+//	@PutMapping("/user/updaterole")
 	
-//	@GetMapping("/user/changepassword")
-//	@GetMapping("/user/forgotpassword")
-//	@GetMapping("/user/updaterole")
 }

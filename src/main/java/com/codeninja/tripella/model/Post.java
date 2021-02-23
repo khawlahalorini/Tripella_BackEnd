@@ -9,9 +9,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.codeninja.tripella.dao.ReviewDao;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Post {
@@ -28,14 +34,17 @@ public class Post {
 	private String country;
 	private double lat;
 	private double lng;
-	private String Photo;
+	private String photo;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy="post")
 	private List<Review> reviews;
 	
+	@JsonIgnore
 	@ManyToMany(mappedBy = "wishlist")
 	private List<User> wishlistedBy;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy="post")
 	private List<Detail> detail;
 	
@@ -120,15 +129,24 @@ public class Post {
 	}
 
 	public String getPhoto() {
-		return Photo;
+		return photo;
 	}
 
 	public void setPhoto(String photo) {
-		Photo = photo;
+		this.photo = photo;
 	}
 
 	public List<Review> getReviews() {
 		return reviews;
+	}
+	
+	@Transient //don't consider this part of the Entity
+	@Autowired
+	ReviewDao reviewDao;
+	
+	@JsonGetter
+	public List<Review> reviews() {
+		return reviewDao.findAllByPost_Id(this.id);
 	}
 
 	public void setReviews(List<Review> reviews) {
@@ -159,7 +177,8 @@ public class Post {
 		this.updatedAt = updatedAt;
 	}
 	
-	public double getAverageRating() {
+	@JsonGetter
+	public double averageRating() {
 		//reviews have to be > 0
 		if (reviews.size() > 0) {
 			int sumOfRatings = 0;
@@ -171,4 +190,9 @@ public class Post {
 		} else
 			return 0;
 	}
+	
+//	@JsonGetter
+//	public Long reviewCount() {
+//		return reviewDao.countByPost_Id(this.id);
+//	}
 }

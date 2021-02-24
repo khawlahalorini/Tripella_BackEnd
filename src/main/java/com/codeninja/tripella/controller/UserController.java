@@ -2,23 +2,11 @@ package com.codeninja.tripella.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
-
 import javax.mail.*;
-import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codeninja.tripella.model.Post;
+
 import com.codeninja.tripella.model.User;
 import com.codeninja.tripella.model.UserDetailsImpl;
 import com.codeninja.tripella.service.UserService;
-import com.codeninja.tripella.config.JwtUtil;
-import com.codeninja.tripella.dao.PostDao;
-import com.codeninja.tripella.dao.UserDao;
+import com.codeninja.tripella.service.WishlistService;
 
 @RestController
 public class UserController {
@@ -42,7 +28,8 @@ public class UserController {
 	UserService userService; 
 	
 	@Autowired
-	PostDao postDao;
+	WishlistService wishlistService; 
+
 
 	@PostMapping("/user/register")
 	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) {
@@ -72,32 +59,13 @@ public class UserController {
 	
 	@GetMapping("/user/wishlist")
 	public ResponseEntity<?> getWishlist(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		User user = userDao.findById(currentUser.getId());
-//		return ResponseEntity.ok(user.getWishlist());
-		return ResponseEntity.ok(postDao.findAllByWishlistedBy_Id(user.getId()));
+		return wishlistService.getWishlist(currentUser);
 	}
 	
 	@PutMapping("/user/wishlist")
 	public ResponseEntity<?> addToWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
 		
-		//get user object & user's wishlist
-		User user = userDao.findById(currentUser.getId());
-		List<Post> wishlist = user.getWishlist();
-		Post post;
-		
-		//validate post id
-		if(!postDao.existsById(id)) 
-			return ResponseEntity.badRequest().build();
-		
-		post = postDao.findById(id);
-		
-		if ( !wishlist.contains( postDao.findById(id) ) ) {
-			wishlist.add(postDao.findById(id));
-			user.setWishlist(wishlist);
-			userDao.save(user);
-		}
-		
-		return ResponseEntity.ok().build();
+		return wishlistService.addToWishlist(id, currentUser);
 	}
 	
 	@DeleteMapping("/user/wishlist")
@@ -106,24 +74,22 @@ public class UserController {
 		return ResponseEntity.ok().build();
 	}
 	
-	@GetMapping("/user/triplist")
+	@GetMapping("/user/triplist") // ask for service 
 	public ResponseEntity<?> getTripList(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		User user = userDao.findById(currentUser.getId());
-		return ResponseEntity.ok(user.getTrip());
+		return wishlistService.getTripList(currentUser);
 	}
 	
-	@PutMapping("/user/handleresetpassword")
+	@PutMapping("/user/forgotpassword")
 	public void handleresetpassword(@RequestParam String email) throws UnsupportedEncodingException, MessagingException {
 		userService.handleresetpassword(email);
 	}
     
 	
-    @PostMapping("/user/handleresetpassword/resetpassword/updatepassword")
+    @PostMapping("/user/forgotpassword/resetpassword/updatepassword") // اقتراح URL افضل 
     public void updatePassword(@RequestParam String newPassword, @RequestParam String token) {
     	userService.updatePassword(newPassword, token);
     }
     
-//	@PutMapping("/user/forgotpassword")
 //	@PutMapping("/user/updaterole")
 	
 }

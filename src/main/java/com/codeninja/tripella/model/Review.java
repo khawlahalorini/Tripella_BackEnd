@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 @Entity
 public class Review {
@@ -13,7 +14,10 @@ public class Review {
 	@GeneratedValue
 	private int id;
 	
+	@NotNull
 	private String content;
+	
+	@NotNull
 	private int rating;
 	
 	@ManyToOne

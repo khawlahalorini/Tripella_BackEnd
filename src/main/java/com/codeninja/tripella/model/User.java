@@ -42,6 +42,9 @@ public class User {
 	private String photo;
 	
 	@JsonIgnore
+	private String confirmationToken;
+	
+	@JsonIgnore
 	@ManyToMany
 	@JoinTable(name = "wishlists", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "post_id")})
 	private List<Post> wishlist;
@@ -54,6 +57,7 @@ public class User {
 		setLastName(userData.get("LastName"));
 		setPhoto(userData.get("photo"));
 	}
+	
 
 	public User() {
 		super();
@@ -202,5 +206,17 @@ public class User {
 	public void setInshare(List<Trip> inshare) {
 		this.inshare = inshare;
 	}
+
+
+	public String getConfirmationToken() {
+		return confirmationToken;
+	}
+
+
+	public void setConfirmationToken(String confirmationToken) {
+		this.confirmationToken = confirmationToken;
+	}
+	
+	
 	
 }

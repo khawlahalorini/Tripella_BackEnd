@@ -11,5 +11,7 @@ public interface UserDao extends CrudRepository<User,Integer>{
 	public User findById(int id);
 	
 	public User findByEmailAddress(String emailAddress);
+	
+	public User findByConfirmationToken(String token);
 
 }

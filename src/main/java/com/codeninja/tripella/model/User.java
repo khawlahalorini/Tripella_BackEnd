@@ -1,5 +1,6 @@
 package com.codeninja.tripella.model;
 
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class User {
-	
+
 	@Id
 	@GeneratedValue
 	private int id;
@@ -43,6 +44,9 @@ public class User {
 	
 	@JsonIgnore
 	private String confirmationToken;
+	
+	@JsonIgnore
+	private Date expiryDate;
 	
 	@JsonIgnore
 	@ManyToMany
@@ -143,6 +147,7 @@ public class User {
 		this.isEnabled = isEnabled;
 	}
 
+
 	public String getPhoto() {
 		return photo;
 	}
@@ -215,6 +220,16 @@ public class User {
 
 	public void setConfirmationToken(String confirmationToken) {
 		this.confirmationToken = confirmationToken;
+	}
+
+
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+
+
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
 	}
 	
 	

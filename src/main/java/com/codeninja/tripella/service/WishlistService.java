@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import com.codeninja.tripella.dao.PostDao;
 import com.codeninja.tripella.dao.UserDao;
@@ -11,6 +12,7 @@ import com.codeninja.tripella.model.Post;
 import com.codeninja.tripella.model.User;
 import com.codeninja.tripella.model.UserDetailsImpl;
 
+@Service
 public class WishlistService {
 
 	@Autowired

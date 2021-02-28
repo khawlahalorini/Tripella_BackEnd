@@ -12,4 +12,6 @@ public interface TripDao extends CrudRepository<Trip,Integer>{
 	public Trip findById(int id);
 
 	public List<Trip> findAllByUser_Id(int id);
+
+	public List<Trip> findAllBysharedWith_Id(int id);
 }

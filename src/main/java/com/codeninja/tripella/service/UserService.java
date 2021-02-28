@@ -77,8 +77,8 @@ public class UserService {
 		}
 
 		UserDetails userDetails = userDetailsService.loadUserByUsername(userData.get("emailAddress"));
-
-		return ResponseEntity.ok(jwtUtil.generateToken(userDetails));
+		HashMap<String,String> token = new HashMap<String,String>(); token.put("token",jwtUtil.generateToken(userDetails));
+		return ResponseEntity.ok(token);
 	}
 	
 	public ResponseEntity<?> getUserDetails(Integer id, UserDetailsImpl currentUser) {

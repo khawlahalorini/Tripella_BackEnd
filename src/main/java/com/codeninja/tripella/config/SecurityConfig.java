@@ -37,14 +37,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.csrf().disable();
 
 		// Admin only
-		http.authorizeRequests().antMatchers("/user/delete",
-											 "/post/add")
+		http.authorizeRequests().antMatchers("/user/delete", "/user/updaterole",
+											 "/post/delete")
 											.hasRole("ADMIN");
 
 		// Any user
-		http.authorizeRequests().antMatchers("/user/update", "/user/detail", "/user/triplist", "/user/wishlist",  
-											"/post/add", "/trip/add",
-											"/trip/delete")
+		http.authorizeRequests().antMatchers("/user/update", "/user/detail", "/user/triplist", "/user/wishlist", "/user/reviews",  
+											"/post/add", "/post/update",
+											"/review/add", "/review/edit", "/review/delete",
+											"/trip/**",
+											"/detail/**")
 											.hasAnyRole("ADMIN", "USER");
 
 		

@@ -1,13 +1,11 @@
 package com.codeninja.tripella.controller;
 
 import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
 import java.util.HashMap;
 
 import javax.mail.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codeninja.tripella.model.User;
 import com.codeninja.tripella.model.UserDetailsImpl;
+import com.codeninja.tripella.service.ReviewService;
+import com.codeninja.tripella.service.TripService;
 import com.codeninja.tripella.service.UserService;
 import com.codeninja.tripella.service.WishlistService;
 
@@ -31,9 +31,14 @@ public class UserController {
 	UserService userService; 
 	
 	@Autowired
-	WishlistService wishlistService; 
-
-
+	WishlistService wishlistService;
+	
+	@Autowired
+	TripService tripService; 
+	
+	@Autowired
+	ReviewService reviewService;
+	
 	@PostMapping("/user/register")
 	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) throws UnsupportedEncodingException, MessagingException {
 		
@@ -73,19 +78,22 @@ public class UserController {
 	
 	@PutMapping("/user/wishlist")
 	public ResponseEntity<?> addToWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		
 		return wishlistService.addToWishlist(id, currentUser);
 	}
 	
 	@DeleteMapping("/user/wishlist")
 	public ResponseEntity<?> removeFromWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		//List<Post> whishlist
-		return ResponseEntity.ok().build();
+		return wishlistService.removeFromWishlist(id, currentUser);
 	}
 	
 	@GetMapping("/user/triplist") // ask for service 
 	public ResponseEntity<?> getTripList(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return wishlistService.getTripList(currentUser);
+		return tripService.getTrips(currentUser);
+	}
+	
+	@GetMapping("/user/reviews") // ask for service 
+	public ResponseEntity<?> getReviews(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+		return ResponseEntity.ok(reviewService.getReviews(currentUser));
 	}
 	
 	@PutMapping("/user/forgotpassword")

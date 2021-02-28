@@ -226,6 +226,7 @@ public class User {
 
 	public void setExpiryDate(Date expiryDate) {
 		this.expiryDate = expiryDate;
+	}
 
 	public MultipartFile getPhotoFile() {
 		return photoFile;

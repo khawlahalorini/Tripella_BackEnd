@@ -17,43 +17,51 @@ public class WishlistService {
 
 	@Autowired
 	UserDao userDao;
-	
+
 	@Autowired
-	PostDao postDao; 
-	
-	
+	PostDao postDao;
+
 	public ResponseEntity<?> getWishlist(UserDetailsImpl currentUser) {
 		User user = userDao.findById(currentUser.getId());
 //		return ResponseEntity.ok(user.getWishlist());
 		return ResponseEntity.ok(postDao.findAllByWishlistedBy_Id(user.getId()));
 	}
-	
-	public ResponseEntity<?> addToWishlist(int id,UserDetailsImpl currentUser) {
-		
-		//get user object & user's wishlist
+
+	public ResponseEntity<?> addToWishlist(int id, UserDetailsImpl currentUser) {
+
+		// get user object & user's wishlist
 		User user = userDao.findById(currentUser.getId());
 		List<Post> wishlist = user.getWishlist();
-		Post post;
-		
-		//validate post id
-		if(!postDao.existsById(id)) 
-			return ResponseEntity.badRequest().build();
-		
-		post = postDao.findById(id);
-		
-		if ( !wishlist.contains( postDao.findById(id) ) ) {
+
+		// validate post id
+		if (!postDao.existsById(id))
+			return ResponseEntity.badRequest().body("invalid id");
+
+		if (!wishlist.contains(postDao.findById(id))) {
 			wishlist.add(postDao.findById(id));
 			user.setWishlist(wishlist);
 			userDao.save(user);
 		}
-		
-		return ResponseEntity.ok().build();
+
+		return ResponseEntity.ok("added");
 	}
-	
-	public ResponseEntity<?> getTripList(UserDetailsImpl currentUser) {
+
+	public ResponseEntity<?> removeFromWishlist(int id, UserDetailsImpl currentUser) {
+		// get user object & user's wishlist
 		User user = userDao.findById(currentUser.getId());
-		return ResponseEntity.ok(user.getTrip());
+		List<Post> wishlist = user.getWishlist();
+
+		// validate post id
+		if (!postDao.existsById(id))
+			return ResponseEntity.badRequest().body("invalid id");
+
+		if (wishlist.contains(postDao.findById(id))) {
+			wishlist.remove(postDao.findById(id));
+			user.setWishlist(wishlist);
+			userDao.save(user);
+		}
+
+		return ResponseEntity.ok("removed");
 	}
-	
-	
+
 }

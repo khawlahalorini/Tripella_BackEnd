@@ -45,7 +45,7 @@ public class UserController {
 		return userService.register(userData);
 	}
 
-	@GetMapping("/user/authenticate")
+	@PostMapping("/user/authenticate")
 	public ResponseEntity<?> authenticate(@RequestBody HashMap<String,String> userData) {
 		
 		return userService.authenticate(userData); 
@@ -109,8 +109,8 @@ public class UserController {
     
 
     @PostMapping("/user/active")
-    public void updateActive(@RequestParam String email) {
-    	userService.updateActive(email);
+    public ResponseEntity<?> updateActive(@RequestParam String email) {
+    	return userService.updateActive(email);
     }
 
 	@PutMapping("/user/updaterole")

@@ -15,6 +15,6 @@ public interface ReviewDao extends CrudRepository<Review,Integer>{
 
 	public Long countByPost_Id(int id);
 
-	public List<Review> findAllByUser_Id();
+	public List<Review> findAllByUser_Id(int id);
 
 }

@@ -77,6 +77,6 @@ public class PhotoService {
 	}
 	
 	public List<String> getPostPhotos(int id){
-		return getPhotosList("user/", id);
+		return getPhotosList("post/", id);
 	}
 }

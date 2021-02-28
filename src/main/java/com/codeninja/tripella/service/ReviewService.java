@@ -24,7 +24,7 @@ public class ReviewService {
 	}
 
 	public Iterable<Review> getReviews(UserDetailsImpl currentUser) {
-		var reviews = reviewDao.findAllByUser_Id();
+		var reviews = reviewDao.findAllByUser_Id(currentUser.getId());
 		return reviews;
 	}
 

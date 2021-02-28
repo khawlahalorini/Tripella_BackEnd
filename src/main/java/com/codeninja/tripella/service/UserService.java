@@ -125,7 +125,6 @@ public class UserService {
 
 	public String updatePassword(String newPassword, String token) {
 		User user = userDao.findByConfirmationToken(token);
-		System.out.println("token is " + user.getConfirmationToken());
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String encodedPassword = passwordEncoder.encode(newPassword);
 		user.setPassword(encodedPassword);
@@ -167,8 +166,8 @@ public class UserService {
 
 		String content = "<p>Hello,</p>"
 				+ "<p>Click the link below to acctive your account:</p>" + "<p><a href=\"" + link
-				+ "\">Active my account</a></p>" + "<br>" + "<p>Ignore this email if you do remember your password, "
-				+ "or you have not made the request.</p>";
+				+ "\">Active my account</a></p>" + "<br>" + "<p>Ignore this email if "
+				+ "you have not made the request.</p>";
 
 		helper.setSubject(subject);
 
@@ -177,10 +176,11 @@ public class UserService {
 		mailSender.send(message);
 	}
 
-	public void updateActive(String email) {
+	public ResponseEntity<?> updateActive(String email) {
 			User user = userDao.findByEmailAddress(email);
-			System.out.println("here");
 			user.setEnabled(true); 
 			userDao.save(user);
+			return ResponseEntity.ok("user active");
+			
 }
 }

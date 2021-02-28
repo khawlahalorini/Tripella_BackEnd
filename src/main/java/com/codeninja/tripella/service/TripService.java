@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.codeninja.tripella.dao.TripDao;
 import com.codeninja.tripella.model.Trip;
 
-
 @Service
 public class TripService {
 

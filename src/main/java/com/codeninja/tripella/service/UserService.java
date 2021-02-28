@@ -43,23 +43,24 @@ public class UserService {
 
 	@Autowired
 	private JavaMailSender mailSender;
-
+	
+	@Autowired
+	PhotoService photoService;
+	
 	public ResponseEntity<?> register(HashMap<String, String> userData) throws UnsupportedEncodingException, MessagingException {
 
 		User user = new User(userData);
 
 		if (userDao.existsByEmailAddress(user.getEmailAddress())) {
-			return ResponseEntity.badRequest().body("User already exists");
+			return ResponseEntity.badRequest().body("Email already exists");
 		}
 
 		BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder();
 		String newPassword = bCrypt.encode(user.getPassword());
 		user.setPassword(newPassword);
 
-		// secure user roles
-//		user.setUserRole("ROLE_USER");
-
 		userDao.save(user);
+
 		String activeLink = "http://localhost:8080/tripella/user/active?email="
 				+ user.getEmailAddress();
 		sendEmailForActive(user.getEmailAddress(),activeLink );
@@ -79,22 +80,67 @@ public class UserService {
 
 		return ResponseEntity.ok(jwtUtil.generateToken(userDetails));
 	}
+	
+	public ResponseEntity<?> getUserDetails(Integer id, UserDetailsImpl currentUser) {
+		User user = null;
+		user = (id !=null && userDao.existsById(id) && currentUser.isAdmin())
+					? userDao.findById(id.intValue())
+					: userDao.findById(currentUser.getId());
+		
+		return ResponseEntity.ok(user);
+	}
 
-	public ResponseEntity<?> updateUser(int id, User newUser) {
-
-		User oldUser = userDao.findById(newUser.getId());
-
-		newUser.setEmailAddress(oldUser.getEmailAddress()); // secure email address
-		newUser.setPassword(oldUser.getPassword()); // different method for password change
-		newUser.setUserRole(oldUser.getUserRole()); // secure role; can be changed by another method
-
+	public ResponseEntity<?> updateUser(User userBody, UserDetailsImpl currentUser) throws Exception {
+		User user = userDao.findById(currentUser.getId());
+		user.update(userBody);
+		
 		try {
-			userDao.save(newUser);
-			return ResponseEntity.ok("Updated");
+		
+		//check if a new image is sent
+		if(userBody.getPhotoFile() != null && !userBody.getPhotoFile().isEmpty()) {
+			//try {
+				String photo = photoService.upload(userBody.getPhotoFile(),"user");
+				
+				if(photo != null && !photo.isBlank()) {
+					String oldPhoto = user.getPhoto();
+					user.setPhoto(photo);
+					photoService.delete(oldPhoto);	//delete old photo
+				}
+		}
+		
+		//update user details
+			userDao.save(user);
+			return ResponseEntity.accepted().body("Updated");
 		} catch (Exception e) {
+			System.out.println(e);
 			return ResponseEntity.badRequest().body("Not Updated");
 		}
 
+	}
+	
+	public ResponseEntity<?> updateUserRole(UserDetailsImpl currentUser, HashMap<String, String> userData) {
+		
+		if(!userData.containsKey("id") || !userData.containsKey("role"))
+			return ResponseEntity.badRequest().body("requires id, role");
+		
+		int id;
+		
+		try {
+			id = Integer.parseInt(userData.get("id"));
+			if(!userDao.existsById(id) || id == currentUser.getId())
+				throw new Exception();
+		}catch(Exception e) {
+			return ResponseEntity.badRequest().body("invalid id");
+			}
+		
+		String newRole = userData.get("role");
+		
+		if(newRole.equalsIgnoreCase("admin") || newRole.equalsIgnoreCase("user") ) {
+			userDao.findById(id).setUserRole("ROLE_"+newRole.toUpperCase());
+			return ResponseEntity.accepted().body("Updated");
+		}
+		
+		return ResponseEntity.badRequest().body("invalid");
 	}
 
 	public ResponseEntity<?> deleteUser(int id, UserDetailsImpl currentUser) {

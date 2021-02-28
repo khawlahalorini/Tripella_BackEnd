@@ -1,11 +1,16 @@
 package com.codeninja.tripella.model;
 
+import java.util.HashMap;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Review {
@@ -20,10 +25,12 @@ public class Review {
 	@NotNull
 	private int rating;
 	
+	@JsonIgnore
 	@ManyToOne
     @JoinColumn(name="user_id", nullable=false)
     private User user;
 	
+	@JsonIgnore
 	@ManyToOne
     @JoinColumn(name = "post_id")
 	private Post post;
@@ -56,6 +63,12 @@ public class Review {
 
 	public User getUser() {
 		return user;
+	}
+	
+	@JsonGetter
+	public HashMap<String, String> user() {
+		User user = getUser();
+		return user.shortDetail();
 	}
 
 	public void setUser(User user) {

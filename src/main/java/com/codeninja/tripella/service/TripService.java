@@ -2,10 +2,12 @@ package com.codeninja.tripella.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 
 import com.codeninja.tripella.dao.TripDao;
 import com.codeninja.tripella.model.Trip;
 
+@Service
 public class TripService {
 
 	@Autowired

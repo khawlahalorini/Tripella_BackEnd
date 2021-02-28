@@ -1,7 +1,6 @@
 package com.codeninja.tripella.model;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,11 +12,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -26,8 +27,11 @@ public class User {
 	@Id
 	@GeneratedValue
 	private int id;
+	@NotNull
 	private String firstName;
+	@NotNull
 	private String lastName;
+	@NotNull
 	private String emailAddress;
 	
 	@JsonIgnore
@@ -37,7 +41,7 @@ public class User {
 	private String userRole;
 	
 	@JsonIgnore
-	private boolean isEnabled;
+	private boolean isEnabled = true;
 	
 	private String photo;
 	
@@ -57,7 +61,6 @@ public class User {
 		setLastName(userData.get("LastName"));
 		setPhoto(userData.get("photo"));
 	}
-	
 
 	public User() {
 		super();
@@ -82,6 +85,10 @@ public class User {
 	@Column(name = "updatedAt", nullable = false, updatable = true)
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+	
+	@Transient
+	@JsonIgnore
+	private MultipartFile photoFile;
 
 	public int getId() {
 		return id;
@@ -124,7 +131,7 @@ public class User {
 	}
 
 	public String getUserRole() {
-		if(userRole == null || userRole.isBlank())  //set defaultview
+		if(userRole == null || userRole.isBlank())  //default
 			return "ROLE_USER";
 		return userRole;
 	}
@@ -147,6 +154,7 @@ public class User {
 		return photo;
 	}
 
+	@JsonIgnore
 	public void setPhoto(String photo) {
 		this.photo = photo;
 	}
@@ -178,14 +186,6 @@ public class User {
 	public List<Post> getWishlist() {
 		return wishlist;
 	}
-	
-	@JsonGetter
-	public List<Integer> wishlist() {
-		List<Integer> ids = new ArrayList<Integer>();
-		for(Post post : wishlist)
-			ids.add(post.getId());
-		return ids;
-	}
 
 	public void setWishlist(List<Post> wishlist) {
 		this.wishlist = wishlist;
@@ -206,17 +206,36 @@ public class User {
 	public void setInshare(List<Trip> inshare) {
 		this.inshare = inshare;
 	}
-
-
+	
 	public String getConfirmationToken() {
 		return confirmationToken;
 	}
 
-
 	public void setConfirmationToken(String confirmationToken) {
 		this.confirmationToken = confirmationToken;
 	}
+
+	public MultipartFile getPhotoFile() {
+		return photoFile;
+	}
+
+	public void setPhotoFile(MultipartFile photoFile) {
+		this.photoFile = photoFile;
+	}
+
+	public HashMap<String, String> shortDetail() {
+		HashMap<String, String> map = new HashMap<>();
+		map.put("id",String.valueOf(id));
+		map.put("firstName", firstName);
+		map.put("lastName", lastName);
+		map.put("photo", getPhoto());
+		return map;
+	}
 	
-	
+	//map updatable details only
+	public void update(User userData) { 	
+			setFirstName(userData.getFirstName());
+			setLastName(userData.getLastName());
+	}
 	
 }

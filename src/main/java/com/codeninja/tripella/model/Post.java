@@ -1,6 +1,7 @@
 package com.codeninja.tripella.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -13,9 +14,10 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.codeninja.tripella.dao.ReviewDao;
+import com.codeninja.tripella.service.GetBean;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -55,6 +57,10 @@ public class Post {
 	@Column(name = "updatedAt", nullable = false, updatable = true)
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
+	
+	@Transient
+	@JsonIgnore
+	private List<MultipartFile> photoFiles;
 
 	public int getId() {
 		return id;
@@ -140,14 +146,19 @@ public class Post {
 		return reviews;
 	}
 	
-	@Transient //don't consider this part of the Entity
-	@Autowired
-	ReviewDao reviewDao;
+	@Transient
+	private List<Review> reviewsList;
 	
 	@JsonGetter
-	public List<Review> reviews() {
-		return reviewDao.findAllByPost_Id(this.id);
+	public List<Review> reviews(){
+		return reviewsList;
 	}
+	
+	public void appendReviews() {
+		reviewsList = new ArrayList<Review>();
+		ReviewDao reviewDao = (ReviewDao) GetBean.name("reviewDao");
+		reviewsList.addAll(reviewDao.findAllByPost_Id(this.id));
+	}	
 
 	public void setReviews(List<Review> reviews) {
 		this.reviews = reviews;
@@ -191,8 +202,31 @@ public class Post {
 			return 0;
 	}
 	
-//	@JsonGetter
-//	public Long reviewCount() {
-//		return reviewDao.countByPost_Id(this.id);
-//	}
+	@JsonGetter
+	public Long reviewsCount() {
+		ReviewDao reviewDao = (ReviewDao) GetBean.name("reviewDao");
+		return reviewDao.countByPost_Id(this.id);
+	}
+	
+	@Transient
+	@JsonIgnore
+	private List<String> photosList;
+	
+	@JsonGetter
+	public List<String> photos() {
+		return photosList;
+	}
+	
+	public void setPhotosList(List<String> photosList) {
+		this.photosList = photosList;
+	}
+	
+	@JsonIgnore
+	public List<MultipartFile> getPhotoFiles() {
+		return photoFiles;
+	}
+
+	public void setPhotoFiles(List<MultipartFile> photoFiles) {
+		this.photoFiles = photoFiles;
+	}
 }

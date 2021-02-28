@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,12 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codeninja.tripella.dao.PostDao;
 import com.codeninja.tripella.model.Post;
+import com.codeninja.tripella.service.PhotoService;
 
 @RestController
 public class PostController {
 
 	@Autowired
 	PostDao postDao;
+	
+	@Autowired
+	PhotoService photoService;
 
 	@PostMapping("/post/add")
 	public ResponseEntity<?> addPost(@RequestBody Post post) {
@@ -35,15 +40,21 @@ public class PostController {
 		return postDao.findAll();
 	}
 
-	@GetMapping("/post/detail")
-	public ResponseEntity<?> postDetails(@RequestParam int id) {
-		Post post = postDao.findById(id);
-		return (post != null)? ResponseEntity.ok(post)
-							 : ResponseEntity.badRequest().body("Post not found");
+	@GetMapping("/post/detail/{id}")
+	public ResponseEntity<?> postDetails(@PathVariable int id) {
+		
+		if(postDao.existsById(id)) {
+			Post post = postDao.findById(id);
+			post.appendReviews();
+			post.setPhotosList(photoService.getPostPhotos(id));
+			return ResponseEntity.ok(post);
+		}
+		
+		return ResponseEntity.badRequest().body("Post not found");
 	}
 
-	@PutMapping("/post/edit")
-	public ResponseEntity<?> editPost(@RequestBody Post post) {
+	@PutMapping("/post/update")
+	public ResponseEntity<?> updatePost(@RequestBody Post post) {
 		try {
 			postDao.save(post);
 			return ResponseEntity.accepted().body(post);

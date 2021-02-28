@@ -1,11 +1,13 @@
 package com.codeninja.tripella.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
 import java.util.HashMap;
 
 import javax.mail.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +35,7 @@ public class UserController {
 
 
 	@PostMapping("/user/register")
-	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) {
+	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) throws UnsupportedEncodingException, MessagingException {
 		
 		return userService.register(userData);
 	}
@@ -92,11 +94,17 @@ public class UserController {
 	}
     
 	
-    @PostMapping("/user/forgotpassword/resetpassword/updatepassword") // اقتراح URL افضل 
+    @PostMapping("/user/forgotpassword/resetpassword/updatepassword") 
     public void updatePassword(@RequestParam String newPassword, @RequestParam String token) {
     	userService.updatePassword(newPassword, token);
     }
     
+
+    @PostMapping("/user/active")
+    public void updateActive(@RequestParam String email) {
+    	userService.updateActive(email);
+    }
+
 	@PutMapping("/user/updaterole")
 	public ResponseEntity<?> updateUserRole(@RequestBody HashMap<String,String> userData,@AuthenticationPrincipal UserDetailsImpl currentUser){
 		return userService.updateUserRole(currentUser,userData);

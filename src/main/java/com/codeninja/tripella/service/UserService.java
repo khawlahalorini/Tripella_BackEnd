@@ -1,6 +1,8 @@
 package com.codeninja.tripella.service;
 
 import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -45,7 +47,7 @@ public class UserService {
 	@Autowired
 	PhotoService photoService;
 	
-	public ResponseEntity<?> register(HashMap<String, String> userData) {
+	public ResponseEntity<?> register(HashMap<String, String> userData) throws UnsupportedEncodingException, MessagingException {
 
 		User user = new User(userData);
 
@@ -58,7 +60,11 @@ public class UserService {
 		user.setPassword(newPassword);
 
 		userDao.save(user);
-		return ResponseEntity.accepted().body("registered");
+
+		String activeLink = "http://localhost:8080/tripella/user/active?email="
+				+ user.getEmailAddress();
+		sendEmailForActive(user.getEmailAddress(),activeLink );
+		return ResponseEntity.ok("registered, check your email to active your account");
 	}
 
 	public ResponseEntity<?> authenticate(HashMap<String, String> userData) {
@@ -153,6 +159,11 @@ public class UserService {
 		User user = userDao.findByEmailAddress(email);
 		String confirmationToken = UUID.randomUUID().toString();
 		user.setConfirmationToken(confirmationToken);
+		userDao.save(user);
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+		System.out.println("Time Stamp" + timestamp);
+		Date date= new Date(timestamp.getTime());
+		user.setExpiryDate(date);
 		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token="
 				+ confirmationToken; // change this in deployment 
 		sendEmail(email, resetPasswordLink);
@@ -160,10 +171,10 @@ public class UserService {
 
 	public String updatePassword(String newPassword, String token) {
 		User user = userDao.findByConfirmationToken(token);
+		System.out.println("token is " + user.getConfirmationToken());
 		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String encodedPassword = passwordEncoder.encode(newPassword);
 		user.setPassword(encodedPassword);
-
 		user.setConfirmationToken(null);
 		userDao.save(user);
 		return "succ";
@@ -189,5 +200,33 @@ public class UserService {
 
 		mailSender.send(message);
 	}
+	
+	
+	void sendEmailForActive(String recipientEmail, String link) throws MessagingException, UnsupportedEncodingException {
+		MimeMessage message = mailSender.createMimeMessage();
+		MimeMessageHelper helper = new MimeMessageHelper(message);
 
+		helper.setFrom("tt2688519@gmail.com", "Tripella Support");
+		helper.setTo(recipientEmail);
+
+		String subject = "Here's the link to active your account";
+
+		String content = "<p>Hello,</p>"
+				+ "<p>Click the link below to acctive your account:</p>" + "<p><a href=\"" + link
+				+ "\">Active my account</a></p>" + "<br>" + "<p>Ignore this email if you do remember your password, "
+				+ "or you have not made the request.</p>";
+
+		helper.setSubject(subject);
+
+		helper.setText(content, true);
+
+		mailSender.send(message);
+	}
+
+	public void updateActive(String email) {
+			User user = userDao.findByEmailAddress(email);
+			System.out.println("here");
+			user.setEnabled(true); 
+			userDao.save(user);
+}
 }

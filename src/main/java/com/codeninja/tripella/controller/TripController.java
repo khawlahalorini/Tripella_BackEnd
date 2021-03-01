@@ -46,5 +46,10 @@ public class TripController {
 
 		return tripService.deleteTrip(id, currentUser);
 	}
+	
+	@GetMapping("/user/triplist") // ask for service 
+	public ResponseEntity<?> getTripList(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+		return tripService.getTrips(currentUser);
+	}
 
 }

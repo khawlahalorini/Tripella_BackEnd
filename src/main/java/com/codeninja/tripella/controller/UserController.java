@@ -19,25 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codeninja.tripella.model.User;
 import com.codeninja.tripella.model.UserDetailsImpl;
-import com.codeninja.tripella.service.ReviewService;
-import com.codeninja.tripella.service.TripService;
 import com.codeninja.tripella.service.UserService;
-import com.codeninja.tripella.service.WishlistService;
 
 @RestController
 public class UserController {
 
 	@Autowired
 	UserService userService; 
-	
-	@Autowired
-	WishlistService wishlistService;
-	
-	@Autowired
-	TripService tripService; 
-	
-	@Autowired
-	ReviewService reviewService;
 	
 	@PostMapping("/user/register")
 	public ResponseEntity<?> register(@RequestBody HashMap<String,String> userData) throws UnsupportedEncodingException, MessagingException {
@@ -70,31 +58,6 @@ public class UserController {
 		return userService.deleteUser(id, currentUser);
 	}
 	
-	
-	@GetMapping("/user/wishlist")
-	public ResponseEntity<?> getWishlist(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return wishlistService.getWishlist(currentUser);
-	}
-	
-	@PutMapping("/user/wishlist")
-	public ResponseEntity<?> addToWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return wishlistService.addToWishlist(id, currentUser);
-	}
-	
-	@DeleteMapping("/user/wishlist")
-	public ResponseEntity<?> removeFromWishlist(@RequestParam int id,@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return wishlistService.removeFromWishlist(id, currentUser);
-	}
-	
-	@GetMapping("/user/triplist") // ask for service 
-	public ResponseEntity<?> getTripList(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return tripService.getTrips(currentUser);
-	}
-	
-	@GetMapping("/user/reviews") // ask for service 
-	public ResponseEntity<?> getReviews(@AuthenticationPrincipal UserDetailsImpl currentUser) {
-		return ResponseEntity.ok(reviewService.getReviews(currentUser));
-	}
 	
 	@PutMapping("/user/forgotpassword")
 	public void handleresetpassword(@RequestParam String email) throws UnsupportedEncodingException, MessagingException {

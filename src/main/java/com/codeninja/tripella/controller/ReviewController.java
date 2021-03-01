@@ -1,6 +1,7 @@
 package com.codeninja.tripella.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,10 @@ public class ReviewController {
 
 		return reviewService.reviewDetails(id);
 
+	}
+	@GetMapping("/user/reviews") // ask for service 
+	public ResponseEntity<?> getReviews(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+		return ResponseEntity.ok(reviewService.getReviews(currentUser));
 	}
 
 	@PutMapping("/review/edit")

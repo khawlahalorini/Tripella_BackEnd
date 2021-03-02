@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,8 +91,8 @@ public class UserController {
     				  : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Incorrect password");
     }
     
-    @PostMapping("/user/active")
-    public ResponseEntity<?> updateActive(@RequestParam String email) {
+    @GetMapping("/user/active/{email}")
+    public ResponseEntity<?> updateActive(@PathVariable("email") String email) {
     	return userService.updateActive(email);
     }
 

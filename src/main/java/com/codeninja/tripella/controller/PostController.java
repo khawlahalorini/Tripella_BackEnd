@@ -13,19 +13,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-<<<<<<< HEAD
 
-=======
-import com.codeninja.tripella.dao.PostDao;
->>>>>>> 5be86fb61b591094f8bd4358a54b107b96c51c7f
 import com.codeninja.tripella.model.Post;
 import com.codeninja.tripella.service.PostService;
 
 @RestController
 public class PostController {
 
-	@Autowired
-	PostDao postDao;
 	
 	@Autowired
 	PostService postService;

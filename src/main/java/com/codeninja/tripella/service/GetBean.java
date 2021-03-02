@@ -4,6 +4,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +22,9 @@ public class GetBean implements ApplicationContextAware{
 		return context.getBean(className);
 	}
 	
-	
+	public static Environment getEnvironment() {
+		return context.getEnvironment();
+	}
 	
 	
 }

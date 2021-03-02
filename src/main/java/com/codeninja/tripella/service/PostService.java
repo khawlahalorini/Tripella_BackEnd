@@ -1,8 +1,10 @@
 package com.codeninja.tripella.service;
 
+import javax.persistence.EntityNotFoundException;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.codeninja.tripella.dao.PostDao;
 import com.codeninja.tripella.model.Post;
@@ -14,50 +16,68 @@ public class PostService {
 	
 	@Autowired
 	PhotoService photoService;
-	
-	
-	public ResponseEntity<?> addPost(Post post) {
+
+	public Post addPost(Post post) {
 
 		try {
 			postDao.save(post);
-			return ResponseEntity.ok(post);
+			return post;
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			return null;
 		}
 	}
-	
+
 	public Iterable<Post> getPosts() {
 		return postDao.findAll();
 	}
-	
-	public ResponseEntity<?> postDetails(int id) {
+
+	public Post postDetails(int id) {
 		
 		if(postDao.existsById(id)) {
 			Post post = postDao.findById(id);
 			post.appendReviews();
-			post.setPhotosList(photoService.getPostPhotos(id));
-			return ResponseEntity.ok(post);
+			post.setPhotosList(photoService.getPhotosList("post/"+id));
+			return post;
 		}
 		
-		return ResponseEntity.badRequest().body("Post not found");
+		return null;
 	}
-	
-	public ResponseEntity<?> updatePost(Post post) {
+
+	public Post updatePost(Post post) {
 		try {
-			postDao.save(post);
-			return ResponseEntity.accepted().body(post);
+			return postDao.save(post);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			return null;
 		}
 	}
-	
-	public ResponseEntity<?> deletePost(int id) {
+
+	public boolean deletePost(int id) {
 		try {
-			Post post = postDao.findById(id);
 			postDao.deleteById(id);
-			return ResponseEntity.accepted().body(post.getTitle() + " is DELETED!!");
+			deleteAllPhotos(id);
+			return true;
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Does not exist!!");
+			System.out.println(e.getMessage());
+			return false;
 		}
+	}
+	
+	public Integer uploadPhotos(int postID, MultipartFile[] photos) {
+		try {
+			if(!postDao.existsById(postID)) throw new EntityNotFoundException();
+			return photoService.upload(photos, "post/"+postID);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
+	}
+	
+	public boolean deletePhoto(String Photo) {
+		return photoService.delete(Photo);
+	}
+	
+	//should be called only when a post is deleted
+	public boolean deleteAllPhotos(int postId) {
+		return photoService.delete("post/"+postId);
 	}
 }

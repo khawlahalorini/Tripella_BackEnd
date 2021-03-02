@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.codeninja.tripella.config.JwtUtil;
 import com.codeninja.tripella.dao.UserDao;
@@ -47,7 +48,7 @@ public class UserService {
 	@Autowired
 	PhotoService photoService;
 	
-	public ResponseEntity<?> register(HashMap<String, String> userData) throws UnsupportedEncodingException, MessagingException {
+	public ResponseEntity<?> register(HashMap<String, String> userData)throws UnsupportedEncodingException, MessagingException {
 
 		User user = new User(userData);
 
@@ -55,18 +56,20 @@ public class UserService {
 			return ResponseEntity.badRequest().body("Email already exists");
 		}
 
-		BCryptPasswordEncoder bCrypt = new BCryptPasswordEncoder();
-		String newPassword = bCrypt.encode(user.getPassword());
-		user.setPassword(newPassword);
+		user.setPassword(encryptPassword(user.getPassword()));
 
 		userDao.save(user);
-
+		// TODO: get link from application.properties using @Value("${.........}")
 		String activeLink = "http://localhost:8080/tripella/user/active?email="
 				+ user.getEmailAddress();
-		sendEmailForActive(user.getEmailAddress(),activeLink );
-		return ResponseEntity.ok("registered, check your email to active your account");
+		//sendEmailForActive(user.getEmailAddress(),activeLink );
+		return ResponseEntity.ok("registered, check your email to activate your account");
 	}
 
+	private String encryptPassword(String password) {
+		return new BCryptPasswordEncoder().encode(password);
+	}
+	
 	public ResponseEntity<?> authenticate(HashMap<String, String> userData) {
 
 		try {
@@ -90,31 +93,40 @@ public class UserService {
 		return ResponseEntity.ok(user);
 	}
 
-	public ResponseEntity<?> updateUser(User userBody, UserDetailsImpl currentUser) throws Exception {
+	public ResponseEntity<?> updateUser(HashMap<String, String> userData, UserDetailsImpl currentUser) {
 		User user = userDao.findById(currentUser.getId());
-		user.update(userBody);
-		
+		user.update(userData);
+
 		try {
-		
-		//check if a new image is sent
-		if(userBody.getPhotoFile() != null && !userBody.getPhotoFile().isEmpty()) {
-			//try {
-				String photo = photoService.upload(userBody.getPhotoFile(),"user");
-				
-				if(photo != null && !photo.isBlank()) {
-					String oldPhoto = user.getPhoto();
-					user.setPhoto(photo);
-					photoService.delete(oldPhoto);	//delete old photo
-				}
-		}
-		
-		//update user details
 			userDao.save(user);
 			return ResponseEntity.accepted().body("Updated");
 		} catch (Exception e) {
 			System.out.println(e);
 			return ResponseEntity.badRequest().body("Not Updated");
 		}
+	}
+
+	public String updatePhoto(MultipartFile photoFile, UserDetailsImpl currentUser) throws Exception {
+		User user = userDao.findById(currentUser.getId());
+
+		if (/* photoFile != null && */ !photoFile.isEmpty()) {
+
+			try {
+				String photo = photoService.upload(photoFile, "user");
+
+				if (photo != null && !photo.isBlank()) {
+					String oldPhoto = user.getPhoto();
+					user.setPhoto(photo);
+					userDao.save(user);
+					photoService.delete(oldPhoto); // delete old photo
+					return user.getPhoto();
+				}
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		return null;
 
 	}
 	
@@ -164,19 +176,41 @@ public class UserService {
 		System.out.println("Time Stamp" + timestamp);
 		Date date= new Date(timestamp.getTime());
 		user.setExpiryDate(date);
-		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token="
-				+ confirmationToken; // change this in deployment 
+		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token=" // TODO: get link from application.properties using @Value("${.........}")
+				+ confirmationToken; // change this in deployment
 		sendEmail(email, resetPasswordLink);
 	}
 
 	public String updatePassword(String newPassword, String token) {
 		User user = userDao.findByConfirmationToken(token);
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(newPassword);
-		user.setPassword(encodedPassword);
-		user.setConfirmationToken(null);
-		userDao.save(user);
-		return "succ";
+		
+		if(user != null) {
+			user.setPassword(encryptPassword(newPassword));
+			user.setConfirmationToken(null);
+			userDao.save(user);
+			return "succ";
+		}
+		return "Failed";
+	}
+	
+	public Boolean updatePassword(HashMap<String,String> userData, UserDetailsImpl currentUser) {
+		String oldPassword = userData.get("oldPassword");
+    	String newPassword = userData.get("newPassword");
+    	User user = userDao.findById(currentUser.getId());
+    	
+    	try {
+    		if(!new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
+        		return false; 
+        	}
+    		
+			user.setPassword(encryptPassword(newPassword));
+			userDao.save(user);
+	    	return true;
+	    	
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return null;
+		}
 	}
 
 	void sendEmail(String recipientEmail, String link) throws MessagingException, UnsupportedEncodingException {
@@ -208,11 +242,11 @@ public class UserService {
 		helper.setFrom("tt2688519@gmail.com", "Tripella Support");
 		helper.setTo(recipientEmail);
 
-		String subject = "Here's the link to active your account";
+		String subject = "Here's the link to activate your account";
 
 		String content = "<p>Hello,</p>"
-				+ "<p>Click the link below to acctive your account:</p>" + "<p><a href=\"" + link
-				+ "\">Active my account</a></p>" + "<br>" + "<p>Ignore this email if "
+				+ "<p>Click the link below to acctivate your account:</p>" + "<p><a href=\"" + link
+				+ "\">Activate my account</a></p>" + "<br>" + "<p>Ignore this email if "
 				+ "you have not made the request.</p>";
 
 		helper.setSubject(subject);
@@ -226,7 +260,7 @@ public class UserService {
 			User user = userDao.findByEmailAddress(email);
 			user.setEnabled(true); 
 			userDao.save(user);
-			return ResponseEntity.ok("user active");
+			return ResponseEntity.ok("user is activated");
 			
 }
 }

@@ -28,6 +28,7 @@ public class Post {
 	@GeneratedValue
 	private int id;
 	
+	@Column(nullable = false)
 	private String title;
 	private String type;
 	private String information;
@@ -37,6 +38,8 @@ public class Post {
 	private double lat;
 	private double lng;
 	private String photo;
+	
+	//TODO: cascade = CascadeType.REMOVE or orphanRemoval = true
 	
 	@JsonIgnore
 	@OneToMany(mappedBy="post")
@@ -135,7 +138,9 @@ public class Post {
 	}
 
 	public String getPhoto() {
-		return photo;
+		return photo == null || photo.isBlank()
+				? photo
+				: GetBean.getEnvironment().getProperty("aws.s3.bucketURL") + photo;
 	}
 
 	public void setPhoto(String photo) {
@@ -190,8 +195,7 @@ public class Post {
 	
 	@JsonGetter
 	public double averageRating() {
-		//reviews have to be > 0
-		if (reviews.size() > 0) {
+		if (reviews != null && reviews.size() > 0) {
 			int sumOfRatings = 0;
 			for (Review r : reviews) {
 				sumOfRatings += r.getRating();

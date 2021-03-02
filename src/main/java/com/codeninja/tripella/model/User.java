@@ -13,13 +13,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.web.multipart.MultipartFile;
 
+import com.codeninja.tripella.service.GetBean;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -51,6 +50,8 @@ public class User {
 	
 	@JsonIgnore
 	private Date expiryDate;
+	
+	//TODO: cascade = CascadeType.REMOVE or orphanRemoval = true
 	
 	@JsonIgnore
 	@ManyToMany
@@ -89,10 +90,6 @@ public class User {
 	@Column(name = "updatedAt", nullable = false, updatable = true)
 	@UpdateTimestamp
 	private LocalDateTime updatedAt;
-	
-	@Transient
-	@JsonIgnore
-	private MultipartFile photoFile;
 
 	public int getId() {
 		return id;
@@ -156,7 +153,7 @@ public class User {
 
 
 	public String getPhoto() {
-		return photo;
+		return GetBean.getEnvironment().getProperty("aws.s3.bucketURL") + photo;
 	}
 
 	@JsonIgnore
@@ -228,14 +225,6 @@ public class User {
 		this.expiryDate = expiryDate;
 	}
 
-	public MultipartFile getPhotoFile() {
-		return photoFile;
-	}
-
-	public void setPhotoFile(MultipartFile photoFile) {
-		this.photoFile = photoFile;
-	}
-
 	public HashMap<String, String> shortDetail() {
 		HashMap<String, String> map = new HashMap<>();
 		map.put("id",String.valueOf(id));
@@ -246,9 +235,11 @@ public class User {
 	}
 	
 	//map updatable details only
-	public void update(User userData) { 	
-			setFirstName(userData.getFirstName());
-			setLastName(userData.getLastName());
+	public void update(HashMap<String, String> userData) {
+		if(userData.containsKey("firstName"))
+			setFirstName(userData.get("firstName"));
+		if(userData.containsKey("lastName"))
+			setLastName(userData.get("lastName"));
 	}
 	
 }

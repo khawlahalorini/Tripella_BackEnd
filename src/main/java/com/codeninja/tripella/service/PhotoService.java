@@ -45,7 +45,7 @@ public class PhotoService {
 	}
 
 	public String upload(MultipartFile photoFile, String objectName) throws Exception {
-		
+		//TODO: validate file type and size
 		String ext = photoFile.getContentType();
 		ext = "." + ext.substring(ext.lastIndexOf('/') + 1);
 		String relativePath = objectName + "/"+System.currentTimeMillis()+((int)(Math.random()*99)) + ext;
@@ -56,27 +56,42 @@ public class PhotoService {
 		return relativePath;
 	}
 
-	public boolean delete(String photoPath) {
+	public boolean delete(String object) {
+		object = object.replace(bucketURL, "");
 		try {
-			amazonS3.deleteObject(bucketName, photoPath);
-		return true;
+			//TODO: better alternative 
+			for (S3ObjectSummary os : amazonS3.listObjectsV2(bucketName, object).getObjectSummaries()) {
+				amazonS3.deleteObject(bucketName, os.getKey().replace(bucketURL, ""));
+			}
+			return true;
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 			return false;
 		}
 	}
+	
+	public int upload(MultipartFile[] photos, String prefix) {
+		int uploaded = 0;
+		
+		for(MultipartFile photo : photos) {
+			try {
+				upload(photo, prefix);
+				uploaded+=1;
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return uploaded;
+	}
 
-	public List<String> getPhotosList(String objectName, int id) {
+	public List<String> getPhotosList(String objectName) {
 		List<String> list = new ArrayList<String>();
-		for (S3ObjectSummary os : amazonS3.listObjectsV2(bucketName, objectName+"/"+id).getObjectSummaries()) {
+		for (S3ObjectSummary os : amazonS3.listObjectsV2(bucketName, objectName).getObjectSummaries()) {
 			list.add(bucketURL + os.getKey());
 		}
-			
 		return list;
 	}
-	
-	public List<String> getPostPhotos(int id){
-		return getPhotosList("post/", id);
-	}
+
+
 }

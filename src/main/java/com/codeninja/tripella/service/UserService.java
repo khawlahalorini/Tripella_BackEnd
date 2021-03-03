@@ -10,6 +10,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -48,6 +49,9 @@ public class UserService {
 	@Autowired
 	PhotoService photoService;
 	
+	@Value("${app.frontPath}")
+	private String frontPath;
+	
 	public ResponseEntity<?> register(HashMap<String, String> userData)throws UnsupportedEncodingException, MessagingException {
 
 		User user = new User(userData);
@@ -59,10 +63,9 @@ public class UserService {
 		user.setPassword(encryptPassword(user.getPassword()));
 
 		userDao.save(user);
-		// TODO: get link from application.properties using @Value("${.........}")
-		String activeLink = "http://localhost:8080/tripella/user/active?email="
+		String activeLink = frontPath+"/tripella/user/active?email="
 				+ user.getEmailAddress();
-		//sendEmailForActive(user.getEmailAddress(),activeLink );
+		sendEmailForActive(user.getEmailAddress(),activeLink );
 		return ResponseEntity.ok("registered, check your email to activate your account");
 	}
 
@@ -155,6 +158,8 @@ public class UserService {
 		return ResponseEntity.badRequest().body("invalid");
 	}
 
+	
+	
 	public ResponseEntity<?> deleteUser(int id, UserDetailsImpl currentUser) {
 
 		if (currentUser.isAdmin() && userDao.existsById(id) && id != currentUser.getId()) {
@@ -165,6 +170,8 @@ public class UserService {
 		return ResponseEntity.badRequest().build();
 	}
 
+	
+	
 	public void handleresetpassword(String email) throws UnsupportedEncodingException, MessagingException {
 		
 		// adding if user find (if....else or try.....catch? ) 
@@ -176,11 +183,13 @@ public class UserService {
 		System.out.println("Time Stamp" + timestamp);
 		Date date= new Date(timestamp.getTime());
 		user.setExpiryDate(date);
-		String resetPasswordLink = "http://localhost:8080/tripella/user/handleresetpassword/resetpassword?token=" // TODO: get link from application.properties using @Value("${.........}")
+		String resetPasswordLink = frontPath+"/resetpassword?token="
 				+ confirmationToken; // change this in deployment
 		sendEmail(email, resetPasswordLink);
 	}
 
+	
+	
 	public String updatePassword(String newPassword, String token) {
 		User user = userDao.findByConfirmationToken(token);
 		
@@ -192,6 +201,8 @@ public class UserService {
 		}
 		return "Failed";
 	}
+	
+	
 	
 	public Boolean updatePassword(HashMap<String,String> userData, UserDetailsImpl currentUser) {
 		String oldPassword = userData.get("oldPassword");
@@ -213,6 +224,8 @@ public class UserService {
 		}
 	}
 
+	
+	
 	void sendEmail(String recipientEmail, String link) throws MessagingException, UnsupportedEncodingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);

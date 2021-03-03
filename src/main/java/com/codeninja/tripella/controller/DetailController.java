@@ -1,6 +1,7 @@
 package com.codeninja.tripella.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codeninja.tripella.dao.DetailDao;
 import com.codeninja.tripella.model.Detail;
+import com.codeninja.tripella.service.DetailService;
 
 @RestController
 public class DetailController {
@@ -18,11 +20,13 @@ public class DetailController {
 	@Autowired
 	DetailDao dao;
 
+	@Autowired
+	DetailService detailService; 
+	
 	@PostMapping("/detail/add")
-	public Detail addDetail(@RequestBody Detail detail) {
-		dao.save(detail);
+	public ResponseEntity<?> addDetail(@RequestBody Detail detail) {
 
-		return detail;
+		return detailService.addDetail(detail);
 	}
 
 	@GetMapping("/detail/index")
@@ -32,26 +36,27 @@ public class DetailController {
 	}
 
 	@GetMapping("/detail/detail")
-	public Detail detailDetails(@RequestParam int id) {
+	public ResponseEntity<?> detailDetails(@RequestParam int id) {
 
-		Detail detail = dao.findById(id);
-
-		return detail;
+		return detailService.detailDetails(id);
 
 	}
 
 	@PutMapping("/detail/edit")
-	public Detail editDetail(@RequestBody Detail detail) {
-		dao.save(detail);
+	public ResponseEntity<?> editDetail(@RequestBody Detail detail) {
 
-		return detail;
+		return detailService.editDetail(detail);
 	}
 
 	@DeleteMapping("/detail/delete")
 	public boolean deleteDetail(@RequestParam int id) {
-
-		dao.deleteById(id);
-		return true;
+try {
+	dao.deleteById(id);
+	return true;
+}
+catch (Exception e) {
+	return false; 
+}
 	}
 
 }

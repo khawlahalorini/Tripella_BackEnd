@@ -33,7 +33,7 @@ public class ReviewController {
 		return reviewService.reviewDetails(id);
 
 	}
-	@GetMapping("/user/reviews") // ask for service 
+	@GetMapping("/user/reviewlist")
 	public ResponseEntity<?> getReviews(@AuthenticationPrincipal UserDetailsImpl currentUser) {
 		return ResponseEntity.ok(reviewService.getReviews(currentUser));
 	}

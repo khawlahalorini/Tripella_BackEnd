@@ -13,6 +13,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.FutureOrPresent;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Trip {
 	@Id
@@ -26,6 +29,7 @@ public class Trip {
 	
 	private Date end;
 	
+	@JsonIgnore 
 	@ManyToOne
     @JoinColumn(name="user_id", nullable=false)
     private User user;
@@ -34,6 +38,8 @@ public class Trip {
 	@JoinTable(name = "user_share", joinColumns = {@JoinColumn(name = "user_id")}, inverseJoinColumns = {@JoinColumn(name = "trip_id")})
 	private List<User> sharedWith;
 	
+	
+	@JsonBackReference 
 	@OneToMany(mappedBy = "trip")
 	private List<Detail> detail;
 

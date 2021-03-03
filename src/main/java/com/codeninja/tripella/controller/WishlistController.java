@@ -18,7 +18,6 @@ public class WishlistController {
 	@Autowired
 	WishlistService wishlistService;
 	
-	
 	@GetMapping("/user/wishlist")
 	public ResponseEntity<?> getWishlist(@AuthenticationPrincipal UserDetailsImpl currentUser) {
 		return wishlistService.getWishlist(currentUser);

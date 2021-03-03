@@ -63,7 +63,7 @@ public class User {
 		setEmailAddress(userData.get("emailAddress"));
 		setPassword(userData.get("password"));
 		setFirstName(userData.get("firstName"));
-		setLastName(userData.get("LastName"));
+		setLastName(userData.get("lastName"));
 		setPhoto(userData.get("photo"));
 	}
 

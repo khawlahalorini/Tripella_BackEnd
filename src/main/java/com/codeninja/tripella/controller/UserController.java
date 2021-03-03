@@ -55,8 +55,8 @@ public class UserController {
 	}
 	
 	@PutMapping(value="/user/photo", consumes="multipart/form-data")
-	public ResponseEntity<?> updatePhoto(@RequestPart MultipartFile photoFile, @AuthenticationPrincipal UserDetailsImpl currentUser) throws Exception{
-		String body = userService.updatePhoto(photoFile,currentUser);
+	public ResponseEntity<?> updatePhoto(@RequestPart MultipartFile photo, @AuthenticationPrincipal UserDetailsImpl currentUser) throws Exception{
+		String body = userService.updatePhoto(photo,currentUser);
 		return body == null
 				? ResponseEntity.badRequest().body("Upload failed")
 				: ResponseEntity.ok(body);
@@ -75,7 +75,7 @@ public class UserController {
 	}
     
 	
-    @PostMapping("/user/forgotpassword/resetpassword/updatepassword") 
+    @PostMapping("/user/resetpassword")
     public void updatePassword(@RequestParam String newPassword, @RequestParam String token) {
     	userService.updatePassword(newPassword, token);
     }

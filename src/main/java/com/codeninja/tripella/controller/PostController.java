@@ -25,7 +25,7 @@ public class PostController {
 	PostService postService;
 
 	@PostMapping("/post/add")
-	public ResponseEntity<?> addPost(@RequestBody Post post) {
+	public ResponseEntity<?> addPost(@RequestBody Post post ) {
 		Post body = postService.addPost(post);
 		return body == null
 				? ResponseEntity.badRequest().body("Not added")

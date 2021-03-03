@@ -1,5 +1,7 @@
 package com.codeninja.tripella.controller;
 
+import java.util.HashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +26,7 @@ public class DetailController {
 	DetailService detailService; 
 	
 	@PostMapping("/detail/add")
-	public ResponseEntity<?> addDetail(@RequestBody Detail detail) {
+	public ResponseEntity<?> addDetail(@RequestBody HashMap<String, String> detail) {
 
 		return detailService.addDetail(detail);
 	}
@@ -34,6 +36,13 @@ public class DetailController {
 		var details = dao.findAll();
 		return details;
 	}
+	
+	@GetMapping("/detail/trip")
+	public Iterable<Detail> getTrips(@RequestParam int id) {
+
+		return dao.findAllByTrip_id(id);
+	}
+
 
 	@GetMapping("/detail/detail")
 	public ResponseEntity<?> detailDetails(@RequestParam int id) {

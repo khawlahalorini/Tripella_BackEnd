@@ -13,5 +13,4 @@ public interface DetailDao extends CrudRepository<Detail,Integer>{
 	
 	List<Detail> findAllByTrip_id(int id);
 
-
 }

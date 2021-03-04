@@ -44,14 +44,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.cors();
 
 		// Admin only
-		http.authorizeRequests().antMatchers("/user/delete", "/user/updaterole",
-											 "/post/delete", "/post/photo", "/post/delete")
+		http.authorizeRequests().antMatchers("/user/delete", "/user/updaterole"
+											//,"/post/delete", "/post/photo", "/post/delete"
+											 )
 											.hasRole("ADMIN");
 
 		// Any user
 		http.authorizeRequests().antMatchers("/user/update", "/user/detail", "/user/triplist", "/user/wishlist",
 											"/user/reviewlist", "/user/photo", "/user/changepassword", 
 											"/post/add", "/post/update", "/post/photos/**",
+											"/post/delete", "/post/photo", "/post/delete",
 											"/review/add", "/review/edit", "/review/delete",
 											"/trip/**",
 											"/detail/**")

@@ -70,8 +70,12 @@ public class UserController {
 	
 	
 	@PutMapping("/user/forgotpassword")
-	public void handleresetpassword(@RequestParam String email) throws UnsupportedEncodingException, MessagingException {
-		userService.handleresetpassword(email);
+	public ResponseEntity<?> handleresetpassword(@RequestParam String email) throws UnsupportedEncodingException, MessagingException {
+		Boolean result = userService.handleresetpassword(email);
+		if (result == null) return ResponseEntity.badRequest().body("Email does not exist");
+		return userService.handleresetpassword(email)
+				? ResponseEntity.ok("Email is sent")
+				: ResponseEntity.badRequest().body("Error..");
 	}
     
 	
@@ -91,8 +95,8 @@ public class UserController {
     				  : ResponseEntity.status(HttpStatus.FORBIDDEN).body("Incorrect password");
     }
     
-    @GetMapping("/user/active/{email}")
-    public ResponseEntity<?> updateActive(@PathVariable("email") String email) {
+    @GetMapping("/user/active")
+    public ResponseEntity<?> updateActive(@RequestParam String email) {
     	return userService.updateActive(email);
     }
 

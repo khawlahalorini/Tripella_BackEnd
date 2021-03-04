@@ -63,7 +63,7 @@ public class UserService {
 		user.setPassword(encryptPassword(user.getPassword()));
 
 		userDao.save(user);
-		String activeLink = frontPath+"/tripella/user/active?email="
+		String activeLink = frontPath+"/activate?email="  //TODO: replace with token
 				+ user.getEmailAddress();
 		sendEmailForActive(user.getEmailAddress(),activeLink );
 		return ResponseEntity.ok("registered, check your email to activate your account");
@@ -172,20 +172,31 @@ public class UserService {
 
 	
 	
-	public void handleresetpassword(String email) throws UnsupportedEncodingException, MessagingException {
+	public Boolean handleresetpassword(String email) throws UnsupportedEncodingException, MessagingException {
 		
-		// adding if user find (if....else or try.....catch? ) 
-		User user = userDao.findByEmailAddress(email);
-		String confirmationToken = UUID.randomUUID().toString();
-		user.setConfirmationToken(confirmationToken);
-		userDao.save(user);
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-		System.out.println("Time Stamp" + timestamp);
-		Date date= new Date(timestamp.getTime());
-		user.setExpiryDate(date);
-		String resetPasswordLink = frontPath+"/resetpassword?token="
-				+ confirmationToken; // change this in deployment
-		sendEmail(email, resetPasswordLink);
+		try {
+			User user = userDao.findByEmailAddress(email);
+			if(user == null) return null;
+			
+			String confirmationToken = UUID.randomUUID().toString();
+			user.setConfirmationToken(confirmationToken);
+			userDao.save(user);
+			
+			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+			System.out.println("Time Stamp" + timestamp);
+			Date date= new Date(timestamp.getTime());
+			user.setExpiryDate(date);
+			
+			String resetPasswordLink = frontPath+"/resetpassword?token="
+				+ confirmationToken;
+			sendEmail(email, resetPasswordLink);
+			
+			return true;
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+			return false;
+		}
 	}
 
 	
@@ -224,13 +235,14 @@ public class UserService {
 		}
 	}
 
-	
+	@Value("${spring.mail.username}")
+	private String supportEmail;
 	
 	void sendEmail(String recipientEmail, String link) throws MessagingException, UnsupportedEncodingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
 
-		helper.setFrom("tt2688519@gmail.com", "Tripella Support");
+		helper.setFrom(supportEmail, "Tripella Support");
 		helper.setTo(recipientEmail);
 
 		String subject = "Here's the link to reset your password";
@@ -252,7 +264,7 @@ public class UserService {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message);
 
-		helper.setFrom("tt2688519@gmail.com", "Tripella Support");
+		helper.setFrom(supportEmail, "Tripella Support");
 		helper.setTo(recipientEmail);
 
 		String subject = "Here's the link to activate your account";
